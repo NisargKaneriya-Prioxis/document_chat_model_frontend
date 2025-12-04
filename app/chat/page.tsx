@@ -6,8 +6,9 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import TextareaAutosize from "react-textarea-autosize";
 import { Metadata } from "../../types/metadata";
-import { Sparkles, Paperclip, Send } from "lucide-react";
-import { askChatBot } from '@/api/chatService';
+import { Sparkles, Paperclip, Send, File, Loader2 } from "lucide-react";
+import { askChatBot, fetchFiles, uploadPdfs } from "@/api/chatService";
+import { useRouter } from 'next/navigation';
 
 const suggestionChips = [
   "Benefit for major broken bone?",
@@ -40,6 +41,9 @@ export default function TruPilotChat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState("");
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -47,9 +51,6 @@ export default function TruPilotChat() {
     const newSessionId = "user_" + Math.random().toString(36).substring(2, 10);
     setSessionId(newSessionId);
   }, []);
-
-  // --- REMOVED AUTO-SCROLL EFFECT ---
-  // The useEffect that triggered scrollIntoView on [messages, loading] is deleted.
 
   const tokenStats = messages.reduce(
     (acc, msg) => {
@@ -103,46 +104,62 @@ export default function TruPilotChat() {
     setLoading(false);
   };
 
+
+  const handlePaperclipClick = () => {
+    fileInputRef.current?.click();
+  };
+
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+
+    try {
+      await uploadPdfs(files);
+      alert("PDF uploaded successfully!");
+    } catch (error) {
+      alert("Failed to upload file");
+    } finally {
+      setIsUploading(false);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <div className="flex h-[100dvh] bg-[#F8F9FC] font-sans text-slate-800">
-      {/* --- Sidebar (Left) --- */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
-        <div className="h-16 flex items-center px-6 border-b border-gray-100">
-          <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-[#2B235E]">
-            <span className="text-purple-600 text-2xl">
-              {" "}
-              <Sparkles className="w-5 h-5" />
-            </span>{" "}
-            TruPilot
-          </div>
-        </div>
-
-        <nav className="flex-1 py-6 px-4 space-y-2">
-          <div className="flex items-center gap-3 px-4 py-3 bg-purple-50 text-purple-700 rounded-lg cursor-pointer font-medium">
-            <Sparkles className="w-5 h-5" />
-            TruPilot
-          </div>
-        </nav>
-      </aside>
-
       {/* --- Main Content (Right) --- */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10"></header>
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 pl-4 ">
+              <button className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-50 transition-colors" onClick={() => router.push('/files')}>
+                <File size={20} />
+                <span>Open File</span>
+              </button>
+            </div>
+            <div className="absolute right-4 z-20">
+              <button
+                onClick={() =>
+                  sendMessage(guidedQuestions[0], guidedQuestions.slice(1))
+                }
+                className="flex items-center gap-2 bg-[#2B235E] text-white px-4 py-2 rounded-md text-sm hover:bg-[#1a153a] transition shadow-sm"
+              >
+                Run Test Flow
+              </button>
+            </div>
+          </div>
+        </header>
 
         {/* Chat Area */}
         <main className="flex-1 overflow-y-auto p-6 scrollbar-hide relative flex flex-col items-center">
           {/* "Run Test Flow" Button (Top Right) */}
-          <div className="absolute top-6 right-6 z-20">
-            <button
-              onClick={() =>
-                sendMessage(guidedQuestions[0], guidedQuestions.slice(1))
-              }
-              className="flex items-center gap-2 bg-[#2B235E] text-white px-4 py-2 rounded-md text-sm hover:bg-[#1a153a] transition shadow-sm"
-            >
-              Run Test Flow
-            </button>
-          </div>
+
 
           <div className="w-full max-w-4xl flex flex-col gap-8 pb-32">
             {/* --- Empty State --- */}
@@ -174,19 +191,36 @@ export default function TruPilotChat() {
                   />
                   <div className="flex items-center justify-between px-4 pb-4 mt-2">
                     <div className="flex gap-4 text-gray-400">
-                      <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition">
-                        <Paperclip className="w-4 h-4" />
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="hidden" 
+                        style={{ display: 'none' }}
+                        accept=".pdf" 
+                        multiple 
+                      />
+                      <button
+                        onClick={handlePaperclipClick}
+                        disabled={isUploading}
+                        className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition disabled:opacity-50"
+                        title="Attach PDF"
+                      >
+                        {isUploading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Paperclip className="w-4 h-4" />
+                        )}
                       </button>
                     </div>
 
                     <button
                       onClick={() => sendMessage()}
                       disabled={!input.trim()}
-                      className={`p-2 rounded-xl transition-all duration-200 ${
-                        input.trim()
-                          ? "bg-[#2B235E] text-white shadow-md hover:bg-[#1a153a] transform scale-105"
-                          : "bg-gray-100 text-gray-300 cursor-not-allowed"
-                      }`}
+                      className={`p-2 rounded-xl transition-all duration-200 ${input.trim()
+                        ? "bg-[#2B235E] text-white shadow-md hover:bg-[#1a153a] transform scale-105"
+                        : "bg-gray-100 text-gray-300 cursor-not-allowed"
+                        }`}
                     >
                       <Send className="w-5 h-5" />
                     </button>
@@ -353,19 +387,39 @@ export default function TruPilotChat() {
                 />
                 <div className="flex items-center justify-between px-4 pb-4 pt-1">
                   <div className="flex gap-2">
-                    <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition">
-                      <Paperclip className="w-4 h-4" />
+                    {/* HIDDEN INPUT: This opens the actual file window */}
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="hidden" // Hides it visually
+                      style={{ display: 'none' }}
+                      accept=".pdf" // Restrict to PDF
+                      multiple // Allow multiple files
+                    />
+
+                    {/* VISIBLE BUTTON: Your Paperclip UI */}
+                    <button
+                      onClick={handlePaperclipClick}
+                      disabled={isUploading}
+                      className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition disabled:opacity-50"
+                      title="Attach PDF"
+                    >
+                      {isUploading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Paperclip className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                   <div className="flex gap-2 items-center">
                     <button
                       onClick={() => sendMessage()}
                       disabled={!input.trim()}
-                      className={`p-2 rounded-xl transition ${
-                        input.trim()
-                          ? "bg-[#2B235E] text-white shadow-md"
-                          : "bg-gray-200 text-gray-400"
-                      }`}
+                      className={`p-2 rounded-xl transition ${input.trim()
+                        ? "bg-[#2B235E] text-white shadow-md"
+                        : "bg-gray-200 text-gray-400"
+                        }`}
                     >
                       <Send className="w-4 h-4" />
                     </button>
@@ -375,7 +429,7 @@ export default function TruPilotChat() {
             </div>
 
             {/* Footer Stats (Subtle) */}
-            <div className="mt-2 text-[10px] text-gray-400 flex gap-4">
+            <div className="mt-2 text-[10px] text-grey-700 flex gap-4">
               <span>ID: {sessionId}</span>
               <span>Highest Tokens: {tokenStats.highestTokens}</span>
               <span>Total Token: {tokenStats.totalTokens}</span>
