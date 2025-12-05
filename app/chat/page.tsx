@@ -56,16 +56,10 @@ export default function TruPilotChat() {
     (acc, msg) => {
       if (msg.metadata) {
         acc.totalTokens += msg.metadata.token_usage.total_tokens;
-        acc.totalCost += msg.metadata.cost_estimate_usd.total_cost ?? 0;
-        acc.highestTokens = Math.max(
-          acc.highestTokens,
-          msg.metadata.token_usage.total_tokens
-        );
-        acc.metadataCount += 1;
       }
       return acc;
     },
-    { highestTokens: 0, totalTokens: 0, totalCost: 0, metadataCount: 0 }
+    { totalTokens: 0 }
   );
 
   const sendMessage = async (
@@ -336,12 +330,6 @@ export default function TruPilotChat() {
                       <div className="mt-6 pt-4 border-t border-gray-100 flex flex-wrap gap-3 items-center">
                         <div className="flex items-center gap-1 text-xs text-gray-500">
                           <span className="font-medium">Cost:</span>
-                          <span className="bg-green-50 text-green-700 px-1.5 py-0.5 rounded">
-                            $
-                            {(
-                              msg.metadata.cost_estimate_usd.total_cost ?? 0
-                            ).toFixed(6)}
-                          </span>
                         </div>
                         <div className="flex items-center gap-1 text-xs text-gray-500">
                           <span className="font-medium">Tokens:</span>
@@ -433,9 +421,7 @@ export default function TruPilotChat() {
             {/* Footer Stats (Subtle) */}
             <div className="mt-2 text-[10px] text-grey-700 flex gap-4">
               <span>ID: {sessionId}</span>
-              <span>Highest Tokens: {tokenStats.highestTokens}</span>
               <span>Total Token: {tokenStats.totalTokens}</span>
-              <span>Total Cost: ${tokenStats.totalCost.toFixed(5)}</span>
             </div>
           </div>
         )}
