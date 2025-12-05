@@ -66,7 +66,7 @@ const FileDashboard = () => {
       const result = await deleteAllFiles();
       setFiles([]);
       setTotalCount(0);
-      setShowResetModal(false); // Close modal
+      setShowResetModal(false); 
       alert(`System Reset Complete. Deleted ${result.details.deleted_files_count} files.`);
       
     } catch (err) {

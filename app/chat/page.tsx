@@ -134,6 +134,7 @@ export default function TruPilotChat() {
     <div className="flex h-[100dvh] bg-[#F8F9FC] font-sans text-slate-800">
       {/* --- Main Content (Right) --- */}
       <div className="flex-1 flex flex-col min-w-0">
+
         {/* Top Header */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10">
           <div className="flex items-center gap-4">
@@ -143,6 +144,8 @@ export default function TruPilotChat() {
                 <span>Open File</span>
               </button>
             </div>
+
+            {/* Run Test Flow Header Right */}
             <div className="absolute right-4 z-20">
               <button
                 onClick={() =>
@@ -158,7 +161,6 @@ export default function TruPilotChat() {
 
         {/* Chat Area */}
         <main className="flex-1 overflow-y-auto p-6 scrollbar-hide relative flex flex-col items-center">
-          {/* "Run Test Flow" Button (Top Right) */}
 
 
           <div className="w-full max-w-4xl flex flex-col gap-8 pb-32">
@@ -392,10 +394,10 @@ export default function TruPilotChat() {
                       type="file"
                       ref={fileInputRef}
                       onChange={handleFileChange}
-                      className="hidden" // Hides it visually
+                      className="hidden" 
                       style={{ display: 'none' }}
-                      accept=".pdf" // Restrict to PDF
-                      multiple // Allow multiple files
+                      accept=".pdf" 
+                      multiple 
                     />
 
                     {/* VISIBLE BUTTON: Your Paperclip UI */}
