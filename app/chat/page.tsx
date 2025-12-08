@@ -9,6 +9,8 @@ import { Metadata } from "../../types/metadata";
 import { Sparkles, Paperclip, Send, File, Loader2 } from "lucide-react";
 import { askChatBot, fetchFiles, uploadPdfs } from "@/api/chatService";
 import { useRouter } from 'next/navigation';
+import { showUploadSuccess, showUploadError } from "@/utils/alerts";
+
 
 const suggestionChips = [
   "Benefit for major broken bone?",
@@ -115,15 +117,12 @@ export default function TruPilotChat() {
 
     try {
       await uploadPdfs(files);
-      alert("PDF uploaded successfully!");
+      showUploadSuccess();
     } catch (error) {
-      alert("Failed to upload file");
+      showUploadError();
     } finally {
       setIsUploading(false);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -183,6 +182,7 @@ export default function TruPilotChat() {
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
+                        setInput("");
                         e.preventDefault();
                         sendMessage();
                       }
@@ -214,7 +214,10 @@ export default function TruPilotChat() {
                     </div>
 
                     <button
-                      onClick={() => sendMessage()}
+                      onClick={() => {
+                        setInput("");
+                        sendMessage();
+                      }}
                       disabled={!input.trim()}
                       className={`p-2 rounded-xl transition-all duration-200 ${input.trim()
                         ? "bg-[#2B235E] text-white shadow-md hover:bg-[#1a153a] transform scale-105"
@@ -371,6 +374,7 @@ export default function TruPilotChat() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
+                      setInput("");
                       e.preventDefault();
                       sendMessage();
                     }
@@ -407,7 +411,10 @@ export default function TruPilotChat() {
                   </div>
                   <div className="flex gap-2 items-center">
                     <button
-                      onClick={() => sendMessage()}
+                      onClick={() => {
+                        setInput("");
+                        sendMessage();
+                      }}
                       disabled={!input.trim()}
                       className={`p-2 rounded-xl transition ${input.trim()
                         ? "bg-[#2B235E] text-white shadow-md"
