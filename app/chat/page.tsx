@@ -87,10 +87,13 @@ export default function TruPilotChat() {
         const [nextQ, ...remainingQs] = autoNextQuestions;
         setTimeout(() => sendMessage(nextQ, remainingQs), 500);
       }
-    } catch {
+    } catch(error:any) {
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: "Error contacting the server." },
+        { 
+          sender: "bot", 
+          text: `${error.message || "Error contacting the server."}` 
+        },
       ]);
     }
 

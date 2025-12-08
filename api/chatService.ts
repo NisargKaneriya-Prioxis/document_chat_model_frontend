@@ -40,7 +40,14 @@ export const askChatBot = async (query: string, sessionId: string): Promise<Chat
     });
 
     if (!res.ok) {
-      throw new Error(`API error: ${res.status}`);
+
+      const errorData = await res.json().catch(() => ({})); 
+
+      if (res.status === 404 && errorData.error_code === "NO_DOCUMENTS") {
+        throw new Error(errorData.answer || "No documents found. Please upload a PDF first.");
+      }
+
+      throw new Error(errorData.detail || `API error: ${res.status}`);
     }
 
     const data = await res.json();
