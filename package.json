@@ -17,7 +17,8 @@
     "react-router-dom": "^7.10.0",
     "react-textarea-autosize": "^8.5.9",
     "rehype-raw": "^7.0.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "sweetalert2": "^11.26.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
