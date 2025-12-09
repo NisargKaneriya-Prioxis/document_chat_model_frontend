@@ -60,11 +60,6 @@ export default function TruPilotChat() {
     setSessionId("user_" + Math.random().toString(36).substring(2, 10));
   }, []);
 
-  // Auto-scroll to bottom
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
-
   const tokenStats = messages.reduce((acc, msg) => {
     if (msg.metadata?.token_usage) {
       return { totalTokens: acc.totalTokens + msg.metadata.token_usage.total_tokens };
@@ -87,7 +82,7 @@ export default function TruPilotChat() {
       
       const enrichedMetadata: MessageMetadata = {
         ...data.metadata,
-        sources: data.source 
+        sources: data.source || [],
       };
 
       setMessages((prev) => [
@@ -263,7 +258,7 @@ export default function TruPilotChat() {
                         {msg.metadata.sources && msg.metadata.sources.length > 0 && (
                           <div className="flex flex-col gap-2">
                              <div className="flex items-center gap-1 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                <Info size={12} /> Sources
+                                Sources
                              </div>
                              <div className="flex flex-wrap gap-2">
                                {msg.metadata.sources.map((source, i) => (
