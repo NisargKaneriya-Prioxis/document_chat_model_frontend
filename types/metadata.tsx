@@ -1,17 +1,16 @@
-export interface Metadata {
-    model_used: string;
-    token_usage: {
-        prompt_tokens: number;
-        completion_tokens: number;
-        total_tokens: number;
-    };
-    pricing: {
-        input_price_per_million: number;
-        output_price_per_million: number;
-    };
-    cost_estimate_usd: {
-        input_cost: number;
-        output_cost: number;
-        total_cost: number;
-    };
+export interface Source {
+  file: string;
+  link: string;
+}
+
+export interface TokenUsage {
+  completion_tokens: number;
+  prompt_tokens: number;
+  total_tokens: number;
+}
+
+export interface EnrichedMetadata {
+  model_used: string;
+  token_usage: TokenUsage;
+  sources?: Source[]; 
 }

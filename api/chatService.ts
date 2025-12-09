@@ -1,6 +1,25 @@
+// export interface ChatResponse {
+//   answer: string;
+//   metadata?: any;
+// }
+
+export interface ChatSource {
+  file: string;
+  link: string;
+}
+
 export interface ChatResponse {
   answer: string;
-  metadata?: any;
+  metadata: {
+    token_usage?: {
+      total_tokens: number;
+    };
+    model_used?: string;
+    // Allow other arbitrary metadata keys
+    [key: string]: any; 
+  };
+  // We guarantee this will always be an array in our return
+  source: ChatSource[]; 
 }
 
 export interface UploadResponse {
@@ -26,6 +45,7 @@ export interface SystemResetResponse {
 const API_URL = process.env.NEXT_PUBLIC_BASE_URL || "";
 
 // Function to ask the chatbot a question
+
 export const askChatBot = async (query: string, sessionId: string): Promise<ChatResponse> => {
   try {
     const res = await fetch(`${API_URL}/ask`, {
@@ -40,26 +60,35 @@ export const askChatBot = async (query: string, sessionId: string): Promise<Chat
     });
 
     if (!res.ok) {
+      let errorData;
+      try {
+        errorData = await res.json();
+      } catch (e) {
+        errorData = { detail: await res.text() };
+      }
 
-      const errorData = await res.json().catch(() => ({})); 
-      console.log("Error data: ", errorData)
       if (res.status === 404 && errorData.error_code === "NO_DOCUMENTS") {
-        // throw new Error(errorData.answer || "No documents found. Please upload a PDF first.");
-        return errorData
+        return errorData;
       }
       
-      throw new Error(errorData.detail || `API error: ${res.status}`);
+      throw new Error(errorData.detail || errorData.message || `API error: ${res.status}`);
     }
 
-    const data = await res.json();
-    return data;
+    const rawData = await res.json();
+
+    const standardizedResponse: ChatResponse = {
+      answer: rawData.answer || rawData.response || "", 
+      metadata: rawData.metadata || {},
+      source: rawData.source || rawData.sources || [], 
+    };
+
+    return standardizedResponse;
     
   } catch (error) {
     console.error("Failed to fetch chat response:", error);
     throw error;
   }
 };
-
 
 // Function to upload PDF files
 export const uploadPdfs = async (files: FileList | null): Promise<UploadResponse> => {
