@@ -39,9 +39,11 @@ const guidedQuestions = [
   "How much will unit 3 pay out for a major broken bone?",
   "How many claims can I make on the active lifestyle policy?",
   "What is the max age to apply for a policy?",
-  "A policyholder receives £4,500 for fractures. Later dies from accident. How much is paid?",
+  "A policyholder receives £4,500 for fractures from an accident. Later dies from that same accident. Accidental death = £50,000 per unit * 2 units = £100,000. How much is paid?",
+  "If premiums remain constant, how much more will you pay in premiums between years 5 and 15 (inclusive) than between years 1 and 5 (inclusive) for a 1-unit core+child policy? Core 1 unit = £10, child 1 unit = £2.",
   "Can borrowers repay the loan early?",
   "When does the Lifetime Mortgage become repayable?",
+  "When does a Member's cover terminate?",
   "What documents are required for a death claim?",
 ];
 
