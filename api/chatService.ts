@@ -1,8 +1,3 @@
-// export interface ChatResponse {
-//   answer: string;
-//   metadata?: any;
-// }
-
 export interface ChatSource {
   file: string;
   link: string;
@@ -15,10 +10,8 @@ export interface ChatResponse {
       total_tokens: number;
     };
     model_used?: string;
-    // Allow other arbitrary metadata keys
     [key: string]: any; 
   };
-  // We guarantee this will always be an array in our return
   source: ChatSource[]; 
 }
 
